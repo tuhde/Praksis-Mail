@@ -1,0 +1,17 @@
+id = "mail.30-bulk"
+description = "Bulk mail (Precedence: bulk or junk) that is not from a list goes to the bulk folder."
+effect = "local-write"
+needs = ["mail.move"]
+
+[trigger]
+kind = "event"
+type = "mail.received"
+filter = "event.data.precedence.matches('(?i)^(bulk|junk)$')"
+
+[[action]]
+id = "move"
+capability = "mail.move"
+args = { path = { cel = "event.data.path" }, folder = { cel = "params.bulk_folder" } }
+
+[[action]]
+stop = true

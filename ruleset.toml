@@ -1,0 +1,15 @@
+format_version = 1
+name = "praksis-mail"
+description = "General rules for sorting incoming mail into folders."
+
+[param.spam_folder]
+type = "string"
+default = "Spam"
+
+[param.lists_folder]
+type = "string"
+default = "Lists"
+
+[param.bulk_folder]
+type = "string"
+default = "Bulk"

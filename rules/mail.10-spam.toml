@@ -1,0 +1,17 @@
+id = "mail.10-spam"
+description = "Mail that the mail server marked as spam goes to the spam folder."
+effect = "local-write"
+needs = ["mail.move"]
+
+[trigger]
+kind = "event"
+type = "mail.received"
+filter = "event.data.x_spam_flag.matches('(?i)^yes')"
+
+[[action]]
+id = "move"
+capability = "mail.move"
+args = { path = { cel = "event.data.path" }, folder = { cel = "params.spam_folder" } }
+
+[[action]]
+stop = true
