@@ -12,7 +12,7 @@ filter = "event.data.precedence.matches('(?i)^(bulk|junk)$')"
 [[action]]
 id = "move"
 capability = "mail.move"
-args = { path = { cel = "event.data.path" }, folder = { cel = "params.bulk_folder" } }
+args = { message = { cel = "event.data.message" }, folder = { cel = "params.bulk_folder" } }
 
 [[action]]
 stop = true

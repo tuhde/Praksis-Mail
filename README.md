@@ -51,8 +51,8 @@ Do not edit this repository for personal wishes. Add `patch/<id>.toml`, `replace
 
 ## Needs
 
-The module `maildir` (event `mail.received` with the fields `list_id`, `precedence` and
-`x_spam_flag`, capability `mail.move`).
+A mail module (`maildir` or `imap`) that provides the event `mail.received` with the fields
+`message`, `list_id`, `precedence` and `x_spam_flag`, and the capability `mail.move`.
 
 ## License
 

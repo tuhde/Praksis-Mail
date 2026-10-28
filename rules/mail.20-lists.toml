@@ -12,7 +12,7 @@ filter = "event.data.list_id != ''"
 [[action]]
 id = "move"
 capability = "mail.move"
-args = { path = { cel = "event.data.path" }, folder = { cel = "params.lists_folder" } }
+args = { message = { cel = "event.data.message" }, folder = { cel = "params.lists_folder" } }
 
 [[action]]
 stop = true

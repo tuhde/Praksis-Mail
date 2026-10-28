@@ -12,7 +12,7 @@ filter = "event.data.x_spam_flag.matches('(?i)^yes')"
 [[action]]
 id = "move"
 capability = "mail.move"
-args = { path = { cel = "event.data.path" }, folder = { cel = "params.spam_folder" } }
+args = { message = { cel = "event.data.message" }, folder = { cel = "params.spam_folder" } }
 
 [[action]]
 stop = true
