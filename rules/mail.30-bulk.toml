@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 id = "mail.30-bulk"
 description = "Bulk mail (Precedence: bulk or junk) that is not from a list goes to the bulk folder."
 effect = "local-write"

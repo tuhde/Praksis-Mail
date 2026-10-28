@@ -53,3 +53,7 @@ Do not edit this repository for personal wishes. Add `patch/<id>.toml`, `replace
 
 The module `maildir` (event `mail.received` with the fields `list_id`, `precedence` and
 `x_spam_flag`, capability `mail.move`).
+
+## License
+
+Apache License 2.0, see [LICENSE](LICENSE). Every rule file carries an SPDX header.

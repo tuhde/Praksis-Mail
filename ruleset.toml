@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 format_version = 1
 name = "praksis-mail"
 description = "General rules for sorting incoming mail into folders."

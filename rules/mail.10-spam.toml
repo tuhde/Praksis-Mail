@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 id = "mail.10-spam"
 description = "Mail that the mail server marked as spam goes to the spam folder."
 effect = "local-write"

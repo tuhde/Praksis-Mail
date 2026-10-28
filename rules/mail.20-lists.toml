@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 id = "mail.20-lists"
 description = "Mailing list mail (it has a List-Id header) goes to the lists folder."
 effect = "local-write"
