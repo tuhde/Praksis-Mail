@@ -49,6 +49,13 @@ Do not edit this repository for personal wishes. Add `patch/<id>.toml`, `replace
 `disable/<id>.toml` in your own layer. `praksis effective` shows the `sha256:` value that
 `based_on` needs.
 
+## Tests
+
+`tests/<rule id>.toml` holds the tests of each rule: a mail goes in, the calls the rule makes come
+out. Run them with `praksis test`. They run with the defaults of this layer, whatever your
+`praksis.toml` sets. Praksis refuses a rule that no test makes fire, so a change to a rule comes
+with a change to its tests.
+
 ## Needs
 
 A mail module (`maildir` or `imap`) that provides the event `mail.received` with the fields

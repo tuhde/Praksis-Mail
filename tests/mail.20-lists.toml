@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "mail with a List-Id goes to Lists"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "<dev.lists.example>", precedence = "", x_spam_flag = "" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Lists" }
+
+[[test]]
+name = "mail without a List-Id is left alone"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }
+
+[[test]]
+name = "the lists folder is a parameter"
+[test.params]
+lists_folder = "Mailing lists"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "<dev.lists.example>", precedence = "", x_spam_flag = "" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Mailing lists" }
+
+[[test]]
+name = "spam is dealt with first, so a flagged list mail is left to the spam rule"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "<dev.lists.example>", precedence = "", x_spam_flag = "YES" }

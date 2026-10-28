@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "mail flagged YES goes to Spam"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "YES" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Spam" }
+
+[[test]]
+name = "the flag is not case sensitive"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "yes" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Spam" }
+
+[[test]]
+name = "mail the server did not flag is left alone"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "NO" }
+
+[[test]]
+name = "mail without the header is left alone"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }
+
+[[test]]
+name = "the spam folder is a parameter"
+[test.params]
+spam_folder = "Junk"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "YES" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Junk" }
+
+[[test]]
+name = "spam from a list is still spam"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "a@example.com", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "<dev.lists.example>", precedence = "", x_spam_flag = "YES" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Spam" }
