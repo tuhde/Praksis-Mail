@@ -80,9 +80,9 @@ argument that the grant lists is not covered, so a rule that sends should always
 |---|---|
 | `mail.reader` | three panes: the folders (with the number of unread mails), the mails of the selected folder or of a search (unread in bold, a "More" button for long folders) and the selected mail with its headers, text and attachments. Opening a mail marks it read; buttons mark it unread, star it or move it to the trash |
 
-A view needs a mail module that provides `mail.folders`, `mail.list`, `mail.search` and `mail.get`
-(the `maildir` and `imap` modules do), and grants for them in the layer that owns the view. The
-buttons also need grants for `mail.mark` and `mail.move` (folder `Trash`). For example:
+A view needs a mail module that provides `mail.folders`, `mail.list`, `mail.search`, `mail.get` and
+`mail.attachment` (the `maildir` and `imap` modules do), and grants for them in the layer that owns
+the view. The buttons also need grants for `mail.mark` and `mail.move` (folder `Trash`). For example:
 
 ```toml
 [[grant]]
@@ -91,7 +91,20 @@ layer = "mail"
 capability = "mail.folders"
 ```
 
-(and the same for `mail.list`, `mail.search` and `mail.get`). Open it in Praksis Desktop on the tab Views.
+(and the same for `mail.list`, `mail.search`, `mail.get` and `mail.attachment`). Open it in Praksis Desktop on the tab Views.
+
+## Reading mail safely
+
+Mail is untrusted input, and the reader is built so that a mail cannot do anything:
+
+- **HTML** is turned into text. Only paragraphs, headings, lists, quotes, bold, italic, code and links
+  are kept; scripts, styles, frames, forms and everything else are dropped with their content. The
+  window has no browser engine, so there is nothing that could run a script.
+- **Links** are shown as links only if they go to `http`, `https` or `mailto`. Clicking one shows the
+  whole address and asks before it is opened in your browser.
+- **Remote images** are not loaded. The mail says how many there are, and a button loads them for
+  that mail only (the next mail is blocked again). Nothing is fetched before you press it.
+- **Attachments** are never opened or run. `Save...` asks where to put the file and writes it there.
 
 ## Parameters
 
