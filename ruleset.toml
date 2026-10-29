@@ -18,3 +18,11 @@ default = "Bulk"
 [param.trash_folder]
 type = "string"
 default = "Trash"
+
+[param.sent_folder]
+type = "string"
+default = "Sent"
+
+[param.drafts_folder]
+type = "string"
+default = "Drafts"

@@ -24,6 +24,55 @@ not triggered by events.
 | `mail.star` | stars a mail (`starred=false` takes the star away) | `mail.mark` |
 | `mail.trash` | moves a mail to `params.trash_folder` | `mail.move` |
 | `mail.purge` | deletes a mail for good, **it cannot be undone** | `mail.delete` |
+| `mail.send-message` | sends a mail (`to`, `cc`, `bcc`, `subject`, `text`, `in_reply_to`, `references`) and keeps a copy in `params.sent_folder` | `mail.send`, `mail.append` |
+| `mail.save-draft` | saves a mail that is not finished in `params.drafts_folder`; nothing is sent | `mail.compose`, `mail.append` |
+
+## Sending mail
+
+Sending leaves the machine and cannot be taken back, so `mail.send` has the effect class `external`:
+it always needs a grant, and a rule that sends (an automatic reply, say) is held to the same grants as
+a command that a person starts. The copy in the Sent folder is made **after** the mail was sent, so a
+failure of the copy never keeps a mail from going out, and a command that is repeated after a crash
+puts the copy in place without sending the mail again.
+
+The SMTP module (`smtp`) needs its settings in `praksis.toml` and a credential binding for the password:
+
+```toml
+enabled_modules = ["imap", "smtp"]
+
+[module.smtp]
+host = "smtp.example.org"
+security = "starttls"        # ssl (the default), starttls or none (this machine only)
+user = "me@example.org"
+credential = "smtp:me"
+from = "Me <me@example.org>"
+max_per_hour = 30            # no more than this many mails in any hour, in total
+```
+
+```toml
+# policy.toml
+[credential."smtp:me"]
+command = ["pass", "show", "mail/example"]
+capabilities = ["mail.send"]
+
+[[grant]]
+id = "send"
+layer = "mail"
+capability = "mail.send"
+
+[[grant]]
+id = "keep-sent"
+layer = "mail"
+capability = "mail.append"
+[grant.args]
+folder = { equals = "Sent" }
+```
+
+**A grant only limits the arguments it lists.** To let `mail.send` write to certain people only, list
+`to`, `cc` **and** `bcc` in the grant (`[grant.args]`, with `equals`, `one_of` or `prefix`); a grant
+that limits `to` alone does not stop a mail from going to anyone on `bcc`. A call that leaves out an
+argument that the grant lists is not covered, so a rule that sends should always give `cc` and `bcc`
+(an empty text will do), as these commands do.
 
 ## Views
 
@@ -52,6 +101,8 @@ capability = "mail.folders"
 | `lists_folder` | `Lists` |
 | `bulk_folder` | `Bulk` |
 | `trash_folder` | `Trash` |
+| `sent_folder` | `Sent` |
+| `drafts_folder` | `Drafts` |
 
 Set your own values in `praksis.toml`:
 

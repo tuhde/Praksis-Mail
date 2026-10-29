@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "saves a half written mail as a draft without sending it"
+[test.mock."mail.compose"]
+raw = "ZHJhZnQ="
+[test.event]
+type = "command.mail.save-draft"
+data = { subject = "later" }
+[[test.call]]
+capability = "mail.compose"
+args = { to = "", cc = "", bcc = "", subject = "later", text = "", in_reply_to = "", references = "" }
+[[test.call]]
+capability = "mail.append"
+args = { folder = "Drafts", content = "ZHJhZnQ=", seen = false, draft = true }

@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "sends the mail and keeps a copy in Sent"
+[test.mock."mail.send"]
+raw = "bWFpbCBib2R5"
+[test.event]
+type = "command.mail.send-message"
+data = { to = "anna@example.org", subject = "Hello", text = "Hi Anna" }
+[[test.call]]
+capability = "mail.send"
+args = { to = "anna@example.org", cc = "", bcc = "", subject = "Hello", text = "Hi Anna", in_reply_to = "", references = "" }
+[[test.call]]
+capability = "mail.append"
+args = { folder = "Sent", content = "bWFpbCBib2R5", seen = true }
+
+[[test]]
+name = "the sent folder is a parameter"
+[test.params]
+sent_folder = "Gesendet"
+[test.mock."mail.send"]
+raw = "bWFpbCBib2R5"
+[test.event]
+type = "command.mail.send-message"
+data = { to = "anna@example.org", cc = "bob@example.org", subject = "Hello", text = "Hi", in_reply_to = "<1@x>", references = "<1@x>" }
+[[test.call]]
+capability = "mail.send"
+args = { to = "anna@example.org", cc = "bob@example.org", bcc = "", subject = "Hello", text = "Hi", in_reply_to = "<1@x>", references = "<1@x>" }
+[[test.call]]
+capability = "mail.append"
+args = { folder = "Gesendet", content = "bWFpbCBib2R5", seen = true }

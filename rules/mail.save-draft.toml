@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.save-draft"
+description = "Saves a mail that is not finished in the drafts folder. Nothing is sent."
+effect = "local-write"
+needs = ["mail.compose", "mail.append"]
+
+[trigger]
+kind = "command"
+title = "Save a draft"
+[[trigger.param]]
+name = "to"
+type = "string"
+label = "To"
+default = ""
+[[trigger.param]]
+name = "cc"
+type = "string"
+label = "Cc"
+default = ""
+[[trigger.param]]
+name = "bcc"
+type = "string"
+label = "Bcc"
+default = ""
+[[trigger.param]]
+name = "subject"
+type = "string"
+label = "Subject"
+default = ""
+[[trigger.param]]
+name = "text"
+type = "string"
+label = "Text"
+default = ""
+[[trigger.param]]
+name = "in_reply_to"
+type = "string"
+default = ""
+[[trigger.param]]
+name = "references"
+type = "string"
+default = ""
+
+[[action]]
+id = "compose"
+capability = "mail.compose"
+args = { to = { cel = "event.data.to" }, cc = { cel = "event.data.cc" }, bcc = { cel = "event.data.bcc" }, subject = { cel = "event.data.subject" }, text = { cel = "event.data.text" }, in_reply_to = { cel = "event.data.in_reply_to" }, references = { cel = "event.data.references" } }
+
+[[action]]
+id = "save"
+capability = "mail.append"
+args = { folder = { cel = "params.drafts_folder" }, content = { cel = "results.compose.raw" }, seen = false, draft = true }
