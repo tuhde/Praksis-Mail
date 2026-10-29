@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: Apache-2.0
+# A mail reader: the folders, the mails of the selected folder, and the selected mail.
+# Needs a mail module with the capabilities mail.folders, mail.list and mail.get, and grants for
+# them in the layer that owns this view.
+title = "Mail"
+description = "Folders, the mails of a folder and the selected mail."
+
+[param.folder]
+type = "string"
+default = "INBOX"
+
+[param.message]
+type = "string"
+default = ""
+
+[source.folders]
+capability = "mail.folders"
+
+[source.messages]
+capability = "mail.list"
+args = { folder = { cel = "view.folder" }, limit = 200 }
+
+# the selected mail is read only when there is one
+[source.current]
+capability = "mail.get"
+args = { message = { cel = "view.message" } }
+when = { cel = "view.message != ''" }
+
+[[component]]
+type = "row"
+
+# the folders; choosing one forgets the selected mail
+[[component.children]]
+type = "list"
+width = 200
+items = { cel = "source.folders.folders" }
+title = { cel = "item.name + (item.unread > 0 ? ' (' + string(item.unread) + ')' : '')" }
+emphasis = { cel = "item.unread > 0" }
+select = { param = "folder", value = { cel = "item.name" }, clear = ["message"] }
+empty = "No folders"
+
+# the mails of the folder, unread ones in bold
+[[component.children]]
+type = "table"
+width = 480
+rows = { cel = "source.messages.items" }
+empty = "No mail in this folder"
+emphasis = { cel = "item.unread" }
+columns = [
+  { title = "From", value = { cel = "item.from" } },
+  { title = "Subject", value = { cel = "item.subject" } },
+  { title = "Date", value = { cel = "item.time" }, format = "datetime" },
+]
+select = { param = "message", value = { cel = "item.id" } }
+
+# the selected mail
+[[component.children]]
+type = "column"
+
+[[component.children.children]]
+type = "text"
+value = "Select a mail to read it."
+style = "muted"
+visible = { cel = "view.message == ''" }
+
+[[component.children.children]]
+type = "text"
+value = { cel = "source.current.subject" }
+style = "title"
+visible = { cel = "view.message != ''" }
+
+[[component.children.children]]
+type = "detail"
+visible = { cel = "view.message != ''" }
+fields = [
+  { label = "From", value = { cel = "source.current.from" } },
+  { label = "To", value = { cel = "source.current.to" } },
+  { label = "Date", value = { cel = "source.current.time" }, format = "datetime" },
+]
+
+[[component.children.children]]
+type = "text"
+value = { cel = "source.current.text != '' ? source.current.text : '(this mail has no plain text)'" }
+visible = { cel = "view.message != ''" }
+
+[[component.children.children]]
+type = "table"
+visible = { cel = "view.message != '' && size(source.current.attachments) > 0" }
+rows = { cel = "source.current.attachments" }
+columns = [
+  { title = "Attachment", value = { cel = "item.name" } },
+  { title = "Type", value = { cel = "item.type" } },
+  { title = "Size", value = { cel = "item.size" }, format = "bytes" },
+]

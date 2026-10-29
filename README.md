@@ -13,6 +13,24 @@ Each rule moves the mail and then ends with `stop`, because a moved mail cannot 
 later rule. Rules fire in the order of their ids, so the numbers decide which rule wins when
 several fit. The gaps between them leave room for rules in between.
 
+## Views
+
+| View | What it shows |
+|---|---|
+| `mail.reader` | three panes: the folders (with the number of unread mails), the mails of the selected folder (unread in bold) and the selected mail with its headers, text and attachments |
+
+A view needs a mail module that provides `mail.folders`, `mail.list` and `mail.get` (the `maildir` and
+`imap` modules do), and grants for them in the layer that owns the view, for example:
+
+```toml
+[[grant]]
+id = "read-folders"
+layer = "mail"
+capability = "mail.folders"
+```
+
+(and the same for `mail.list` and `mail.get`). Open it in Praksis Desktop on the tab Views.
+
 ## Parameters
 
 | Name | Default |
