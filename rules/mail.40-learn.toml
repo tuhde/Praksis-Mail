@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.40-learn"
+description = "Remembers who wrote to you, for completing addresses when you write. It comes after the rules for spam, lists and bulk mail, which stop, so it only sees mail from people."
+effect = "local-write"
+needs = ["contacts.add"]
+requires_modules = ["contacts"]
+
+[trigger]
+kind = "event"
+type = "mail.received"
+filter = "event.data.from != ''"
+
+[[action]]
+id = "learn"
+capability = "contacts.add"
+args = { addresses = { cel = "event.data.from" } }

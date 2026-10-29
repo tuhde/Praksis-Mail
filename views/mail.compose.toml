@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+# Writing a mail: a new one, an answer, a forward, or a draft to go on with. Opened from the reader
+# (the buttons Reply, Reply all and Forward) or from the list of views.
+# Needs the smtp module (and the contacts module for the completion of addresses, which is optional).
+requires_modules = ["smtp"]
+title = "Write"
+description = "Write a new mail, or answer or forward the one you read."
+
+# new, reply, reply-all, forward or draft
+[param.mode]
+type = "string"
+default = "new"
+
+# the mail that is answered, forwarded or continued
+[param.reply_to]
+type = "string"
+default = ""
+
+[source.original]
+capability = "mail.get"
+args = { message = { cel = "view.reply_to" } }
+when = { cel = "view.reply_to != ''" }
+
+# the recipients, the subject, the thread and the quoted text of an answer; a source may use the
+# one before it
+[source.answer]
+capability = "mail.reply"
+args = { from = { cel = "source.original.from" }, to = { cel = "source.original.to" }, cc = { cel = "source.original.cc" }, reply_to = { cel = "source.original.reply_to" }, references = { cel = "source.original.references" }, subject = { cel = "source.original.subject" }, date = { cel = "source.original.date" }, message_id = { cel = "source.original.message_id" }, text = { cel = "source.original.text" }, signature = { cel = "params.signature" }, all = { cel = "view.mode == 'reply-all'" } }
+when = { cel = "view.reply_to != '' && (view.mode == 'reply' || view.mode == 'reply-all')" }
+
+[source.forwarded]
+capability = "mail.forward"
+args = { from = { cel = "source.original.from" }, to = { cel = "source.original.to" }, cc = { cel = "source.original.cc" }, subject = { cel = "source.original.subject" }, date = { cel = "source.original.date" }, message_id = { cel = "source.original.message_id" }, text = { cel = "source.original.text" }, signature = { cel = "params.signature" } }
+when = { cel = "view.reply_to != '' && view.mode == 'forward'" }
+
+[[component]]
+type = "form"
+command = "mail.send-message"
+submit_label = "Send"
+done = "mail.reader"
+also = [ { label = "Save draft", command = "mail.save-draft" } ]
+lookup = { capability = "contacts.search", arg = "query", requires_modules = ["contacts"] }
+
+[component.defaults]
+to = { cel = "view.mode == 'draft' ? source.original.to : (view.mode == 'reply' || view.mode == 'reply-all') ? source.answer.to : ''" }
+cc = { cel = "view.mode == 'draft' ? source.original.cc : (view.mode == 'reply' || view.mode == 'reply-all') ? source.answer.cc : ''" }
+subject = { cel = "view.mode == 'draft' ? source.original.subject : view.mode == 'forward' ? source.forwarded.subject : (view.mode == 'reply' || view.mode == 'reply-all') ? source.answer.subject : ''" }
+text = { cel = "view.mode == 'draft' ? source.original.text : view.mode == 'forward' ? source.forwarded.text : (view.mode == 'reply' || view.mode == 'reply-all') ? source.answer.text : (params.signature != '' ? '\\n\\n-- \\n' + params.signature : '')" }
+in_reply_to = { cel = "(view.mode == 'reply' || view.mode == 'reply-all') ? source.answer.in_reply_to : ''" }
+references = { cel = "(view.mode == 'reply' || view.mode == 'reply-all') ? source.answer.references : ''" }

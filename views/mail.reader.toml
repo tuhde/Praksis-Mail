@@ -3,7 +3,8 @@
 # Needs a mail module with the capabilities mail.folders, mail.list, mail.search, mail.get and
 # mail.attachment (to save an attachment), and grants for them in the layer that owns this view. The buttons and opening a mail start the
 # commands mail.read, mail.unread, mail.star and mail.trash, which need grants for mail.mark and
-# mail.move as well.
+# mail.move as well. With the smtp module there are buttons for writing a mail, answering and
+# forwarding (the view mail.compose); without it they are not shown.
 title = "Mail"
 description = "Folders, the mails of a folder and the selected mail."
 
@@ -68,6 +69,12 @@ type = "column"
 width = 520
 
 [[component.children.children]]
+type = "button"
+label = "New mail"
+opens = { view = "mail.compose", params = { mode = "new" } }
+requires_modules = ["smtp"]
+
+[[component.children.children]]
 type = "input"
 param = "query"
 placeholder = "Search the folder (sender, subject, text)"
@@ -98,6 +105,33 @@ type = "column"
 [[component.children.children]]
 type = "row"
 visible = { cel = "view.message != ''" }
+
+[[component.children.children.children]]
+type = "button"
+label = "Reply"
+opens = { view = "mail.compose", params = { mode = "reply", reply_to = { cel = "view.message" } } }
+requires_modules = ["smtp"]
+visible = { cel = "view.folder != params.drafts_folder" }
+
+[[component.children.children.children]]
+type = "button"
+label = "Reply all"
+opens = { view = "mail.compose", params = { mode = "reply-all", reply_to = { cel = "view.message" } } }
+requires_modules = ["smtp"]
+visible = { cel = "view.folder != params.drafts_folder" }
+
+[[component.children.children.children]]
+type = "button"
+label = "Forward"
+opens = { view = "mail.compose", params = { mode = "forward", reply_to = { cel = "view.message" } } }
+requires_modules = ["smtp"]
+
+[[component.children.children.children]]
+type = "button"
+label = "Edit draft"
+opens = { view = "mail.compose", params = { mode = "draft", reply_to = { cel = "view.message" } } }
+requires_modules = ["smtp"]
+visible = { cel = "view.folder == params.drafts_folder" }
 
 [[component.children.children.children]]
 type = "button"

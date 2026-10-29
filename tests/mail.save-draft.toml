@@ -10,7 +10,23 @@ type = "command.mail.save-draft"
 data = { subject = "later" }
 [[test.call]]
 capability = "mail.compose"
-args = { to = "", cc = "", bcc = "", subject = "later", text = "", in_reply_to = "", references = "" }
+args = { to = "", cc = "", bcc = "", subject = "later", text = "", in_reply_to = "", references = "", attachments = [] }
 [[test.call]]
 capability = "mail.append"
 args = { folder = "Drafts", content = "ZHJhZnQ=", seen = false, draft = true }
+
+[[test]]
+name = "the drafts folder is a parameter"
+[test.params]
+drafts_folder = "Entwuerfe"
+[test.mock."mail.compose"]
+raw = "ZHJhZnQ="
+[test.event]
+type = "command.mail.save-draft"
+data = { to = "anna@example.org", subject = "later", text = "x" }
+[[test.call]]
+capability = "mail.compose"
+args = { to = "anna@example.org", cc = "", bcc = "", subject = "later", text = "x", in_reply_to = "", references = "", attachments = [] }
+[[test.call]]
+capability = "mail.append"
+args = { folder = "Entwuerfe", content = "ZHJhZnQ=", seen = false, draft = true }

@@ -26,3 +26,8 @@ default = "Sent"
 [param.drafts_folder]
 type = "string"
 default = "Drafts"
+
+# put under what you write, after two dashes; empty for none
+[param.signature]
+type = "string"
+default = ""

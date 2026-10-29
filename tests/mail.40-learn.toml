@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "the sender of a mail is remembered"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "Anna <anna@example.com>", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }
+[[test.call]]
+capability = "contacts.add"
+args = { addresses = "Anna <anna@example.com>" }
+
+[[test]]
+name = "a mail without a sender is not looked at"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "", to = "me@example.org", subject = "Hello", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }

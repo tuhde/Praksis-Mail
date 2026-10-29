@@ -24,8 +24,10 @@ not triggered by events.
 | `mail.star` | stars a mail (`starred=false` takes the star away) | `mail.mark` |
 | `mail.trash` | moves a mail to `params.trash_folder` | `mail.move` |
 | `mail.purge` | deletes a mail for good, **it cannot be undone** | `mail.delete` |
-| `mail.send-message` | sends a mail (`to`, `cc`, `bcc`, `subject`, `text`, `in_reply_to`, `references`) and keeps a copy in `params.sent_folder` | `mail.send`, `mail.append` |
+| `mail.send-message` | sends a mail (`to`, `cc`, `bcc`, `subject`, `text`, attachments), keeps a copy in `params.sent_folder` and remembers the people it went to | `mail.send`, `mail.append`, `contacts.add` (optional) |
 | `mail.save-draft` | saves a mail that is not finished in `params.drafts_folder`; nothing is sent | `mail.compose`, `mail.append` |
+
+`mail.send-message` and `mail.save-draft` are only there if the `smtp` module is.
 
 ## Sending mail
 
@@ -93,6 +95,70 @@ capability = "mail.folders"
 
 (and the same for `mail.list`, `mail.search`, `mail.get` and `mail.attachment`). Open it in Praksis Desktop on the tab Views.
 
+## Writing mail
+
+With the `smtp` module the reader has the buttons **New mail**, **Reply**, **Reply all** and **Forward**
+(and **Edit draft** in the drafts folder), and the view `mail.compose` for writing:
+
+- the recipients are completed as you type from the address book (the `contacts` module, optional),
+  which learns from mail that people send you (not spam, lists or bulk mail: the rule `mail.40-learn`
+  comes after the rules that stop those) and from the mail you send;
+- a reply goes to the `Reply-To` address if there is one, to nobody twice and not to you; the subject
+  has one `Re:` however many there were, the thread is kept in `In-Reply-To` and `References`, and the
+  mail you answer is quoted below your signature;
+- a forward has the original below a line that says so, with its headers, and starts no thread;
+- **Attach...** copies the file you choose into a private directory of Praksis; the mail is built
+  from that copy, so no rule can attach a file that you did not choose;
+- **Send** asks first (it leaves your computer) and then returns to the reader; **Save draft** keeps
+  what is written and stays where it is. Saving again makes another draft (the old one is trashed by
+  hand), and a draft that is edited again does not bring its attachments back.
+
+Your signature is the ruleset parameter `signature`:
+
+```toml
+[param]
+signature = "Till\nhttps://example.org"
+```
+
+What a ruleset offers that needs a module you did not enable is **left out, not an error**: without
+`smtp` there is no Write view and no Reply button, without `contacts` there is no completion and
+nobody is remembered, and everything else works. (A rule, a view, a part of a view or a step of a rule
+can say `requires_modules = ["smtp"]`.) The daemon says what it left out in its log.
+
+For writing, add to your grants (the layer is the one you gave this ruleset):
+
+```toml
+# reading what an answer starts from, and the completion
+[[grant]]
+id = "mail-get"
+layer = "mail"
+capability = "mail.get"
+[[grant]]
+id = "mail-reply"
+layer = "mail"
+capability = "mail.reply"
+[[grant]]
+id = "mail-forward"
+layer = "mail"
+capability = "mail.forward"
+[[grant]]
+id = "contacts-search"
+layer = "mail"
+capability = "contacts.search"
+# the commands: building, sending and keeping the mail, and the address book
+[[grant]]
+id = "mail-compose"
+layer = "mail"
+capability = "mail.compose"
+[[grant]]
+id = "contacts-add"
+layer = "mail"
+capability = "contacts.add"
+```
+
+(`mail.send` and `mail.append` as above.) The address book is in `~/.praksis/data/contacts/`, and
+`praksis grants` shows `contacts.remove` as destructive if you want to be able to forget an address.
+
 ## Reading mail safely
 
 Mail is untrusted input, and the reader is built so that a mail cannot do anything:
@@ -116,6 +182,7 @@ Mail is untrusted input, and the reader is built so that a mail cannot do anythi
 | `trash_folder` | `Trash` |
 | `sent_folder` | `Sent` |
 | `drafts_folder` | `Drafts` |
+| `signature` | empty |
 
 Set your own values in `praksis.toml`:
 
