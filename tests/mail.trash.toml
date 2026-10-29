@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "moves the mail to Trash"
+[test.event]
+type = "command.mail.trash"
+data = { message = "m1" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Trash" }
+
+[[test]]
+name = "the trash folder is a parameter"
+[test.params]
+trash_folder = "Deleted"
+[test.event]
+type = "command.mail.trash"
+data = { message = "m1" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Deleted" }

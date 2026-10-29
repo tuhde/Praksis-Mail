@@ -13,14 +13,27 @@ Each rule moves the mail and then ends with `stop`, because a moved mail cannot 
 later rule. Rules fire in the order of their ids, so the numbers decide which rule wins when
 several fit. The gaps between them leave room for rules in between.
 
+## Commands
+
+A person starts these (from a view, `praksis run <id> message=<id>`, or the Commands tab). They are
+not triggered by events.
+
+| Command | What it does | Needs |
+|---|---|---|
+| `mail.read` / `mail.unread` | marks a mail read or unread | `mail.mark` |
+| `mail.star` | stars a mail (`starred=false` takes the star away) | `mail.mark` |
+| `mail.trash` | moves a mail to `params.trash_folder` | `mail.move` |
+| `mail.purge` | deletes a mail for good, **it cannot be undone** | `mail.delete` |
+
 ## Views
 
 | View | What it shows |
 |---|---|
-| `mail.reader` | three panes: the folders (with the number of unread mails), the mails of the selected folder (unread in bold) and the selected mail with its headers, text and attachments |
+| `mail.reader` | three panes: the folders (with the number of unread mails), the mails of the selected folder or of a search (unread in bold, a "More" button for long folders) and the selected mail with its headers, text and attachments. Opening a mail marks it read; buttons mark it unread, star it or move it to the trash |
 
-A view needs a mail module that provides `mail.folders`, `mail.list` and `mail.get` (the `maildir` and
-`imap` modules do), and grants for them in the layer that owns the view, for example:
+A view needs a mail module that provides `mail.folders`, `mail.list`, `mail.search` and `mail.get`
+(the `maildir` and `imap` modules do), and grants for them in the layer that owns the view. The
+buttons also need grants for `mail.mark` and `mail.move` (folder `Trash`). For example:
 
 ```toml
 [[grant]]
@@ -29,7 +42,7 @@ layer = "mail"
 capability = "mail.folders"
 ```
 
-(and the same for `mail.list` and `mail.get`). Open it in Praksis Desktop on the tab Views.
+(and the same for `mail.list`, `mail.search` and `mail.get`). Open it in Praksis Desktop on the tab Views.
 
 ## Parameters
 
@@ -38,6 +51,7 @@ capability = "mail.folders"
 | `spam_folder` | `Spam` |
 | `lists_folder` | `Lists` |
 | `bulk_folder` | `Bulk` |
+| `trash_folder` | `Trash` |
 
 Set your own values in `praksis.toml`:
 

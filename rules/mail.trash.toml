@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.trash"
+description = "Moves a mail to the trash folder; it can be fetched from there."
+effect = "local-write"
+needs = ["mail.move"]
+
+[trigger]
+kind = "command"
+title = "Move to trash"
+[[trigger.param]]
+name = "message"
+type = "string"
+
+[[action]]
+id = "move"
+capability = "mail.move"
+args = { message = { cel = "event.data.message" }, folder = { cel = "params.trash_folder" } }

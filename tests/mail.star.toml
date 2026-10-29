@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "stars the mail by default"
+[test.event]
+type = "command.mail.star"
+data = { message = "m1" }
+[[test.call]]
+capability = "mail.mark"
+args = { message = "m1", flagged = true }
+
+[[test]]
+name = "takes the star away"
+[test.event]
+type = "command.mail.star"
+data = { message = "m1", starred = false }
+[[test.call]]
+capability = "mail.mark"
+args = { message = "m1", flagged = false }

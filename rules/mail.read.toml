@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.read"
+description = "Marks a mail as read."
+effect = "local-write"
+needs = ["mail.mark"]
+
+[trigger]
+kind = "command"
+title = "Mark as read"
+[[trigger.param]]
+name = "message"
+type = "string"
+
+[[action]]
+id = "mark"
+capability = "mail.mark"
+args = { message = { cel = "event.data.message" }, seen = true }

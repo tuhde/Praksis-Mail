@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # A mail reader: the folders, the mails of the selected folder, and the selected mail.
-# Needs a mail module with the capabilities mail.folders, mail.list and mail.get, and grants for
-# them in the layer that owns this view.
+# Needs a mail module with the capabilities mail.folders, mail.list, mail.search and mail.get, and
+# grants for them in the layer that owns this view. The buttons and opening a mail start the
+# commands mail.read, mail.unread, mail.star and mail.trash, which need grants for mail.mark and
+# mail.move as well.
 title = "Mail"
 description = "Folders, the mails of a folder and the selected mail."
 
@@ -13,12 +15,28 @@ default = "INBOX"
 type = "string"
 default = ""
 
+# how many mails of the folder are shown; "More" raises it
+[param.limit]
+type = "int"
+default = 200
+
+# what is searched for; empty shows the folder
+[param.query]
+type = "string"
+default = ""
+
 [source.folders]
 capability = "mail.folders"
 
 [source.messages]
 capability = "mail.list"
-args = { folder = { cel = "view.folder" }, limit = 200 }
+args = { folder = { cel = "view.folder" }, limit = { cel = "view.limit" } }
+when = { cel = "view.query == ''" }
+
+[source.found]
+capability = "mail.search"
+args = { folder = { cel = "view.folder" }, query = { cel = "view.query" }, limit = { cel = "view.limit" } }
+when = { cel = "view.query != ''" }
 
 # the selected mail is read only when there is one
 [source.current]
@@ -36,26 +54,70 @@ width = 200
 items = { cel = "source.folders.folders" }
 title = { cel = "item.name + (item.unread > 0 ? ' (' + string(item.unread) + ')' : '')" }
 emphasis = { cel = "item.unread > 0" }
-select = { param = "folder", value = { cel = "item.name" }, clear = ["message"] }
+select = { param = "folder", value = { cel = "item.name" }, clear = ["message", "limit", "query"] }
 empty = "No folders"
 
-# the mails of the folder, unread ones in bold
+# the mails of the folder (or the search), unread ones in bold; opening one marks it read
 [[component.children]]
+type = "column"
+width = 520
+
+[[component.children.children]]
+type = "input"
+param = "query"
+placeholder = "Search the folder (sender, subject, text)"
+
+[[component.children.children]]
 type = "table"
-width = 480
-rows = { cel = "source.messages.items" }
-empty = "No mail in this folder"
+rows = { cel = "view.query == '' ? source.messages.items : source.found.items" }
+empty = "No mail"
 emphasis = { cel = "item.unread" }
 columns = [
+  { title = "", value = { cel = "item.starred ? '*' : ''" } },
   { title = "From", value = { cel = "item.from" } },
   { title = "Subject", value = { cel = "item.subject" } },
   { title = "Date", value = { cel = "item.time" }, format = "datetime" },
 ]
-select = { param = "message", value = { cel = "item.id" } }
+select = { param = "message", value = { cel = "item.id" }, then = { command = "mail.read", args = { message = { cel = "item.id" } } } }
+
+[[component.children.children]]
+type = "button"
+label = "More"
+sets = { param = "limit", value = { cel = "view.limit + 200" } }
+visible = { cel = "size(view.query == '' ? source.messages.items : source.found.items) >= view.limit && view.limit < 1000" }
 
 # the selected mail
 [[component.children]]
 type = "column"
+
+[[component.children.children]]
+type = "row"
+visible = { cel = "view.message != ''" }
+
+[[component.children.children.children]]
+type = "button"
+label = "Mark unread"
+command = "mail.unread"
+args = { message = { cel = "view.message" } }
+
+[[component.children.children.children]]
+type = "button"
+label = "Star"
+command = "mail.star"
+args = { message = { cel = "view.message" } }
+
+[[component.children.children.children]]
+type = "button"
+label = "Unstar"
+command = "mail.star"
+args = { message = { cel = "view.message" }, starred = false }
+
+[[component.children.children.children]]
+type = "button"
+label = "Trash"
+command = "mail.trash"
+args = { message = { cel = "view.message" } }
+sets = { param = "message", value = "" }
 
 [[component.children.children]]
 type = "text"

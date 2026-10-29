@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.unread"
+description = "Marks a mail as unread."
+effect = "local-write"
+needs = ["mail.mark"]
+
+[trigger]
+kind = "command"
+title = "Mark as unread"
+[[trigger.param]]
+name = "message"
+type = "string"
+
+[[action]]
+id = "mark"
+capability = "mail.mark"
+args = { message = { cel = "event.data.message" }, seen = false }

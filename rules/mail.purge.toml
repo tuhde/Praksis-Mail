@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.purge"
+description = "Deletes a mail for good. This cannot be undone."
+effect = "destructive"
+needs = ["mail.delete"]
+
+[trigger]
+kind = "command"
+title = "Delete for good"
+[[trigger.param]]
+name = "message"
+type = "string"
+
+[[action]]
+id = "delete"
+capability = "mail.delete"
+args = { message = { cel = "event.data.message" } }

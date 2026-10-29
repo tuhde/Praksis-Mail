@@ -14,3 +14,7 @@ default = "Lists"
 [param.bulk_folder]
 type = "string"
 default = "Bulk"
+
+[param.trash_folder]
+type = "string"
+default = "Trash"

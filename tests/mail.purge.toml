@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "deletes the mail"
+[test.event]
+type = "command.mail.purge"
+data = { message = "m1" }
+[[test.call]]
+capability = "mail.delete"
+args = { message = "m1" }

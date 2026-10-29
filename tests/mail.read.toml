@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "marks the mail as read"
+[test.event]
+type = "command.mail.read"
+data = { message = "m1" }
+[[test.call]]
+capability = "mail.mark"
+args = { message = "m1", seen = true }

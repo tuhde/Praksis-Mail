@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.star"
+description = "Stars a mail, or takes the star away."
+effect = "local-write"
+needs = ["mail.mark"]
+
+[trigger]
+kind = "command"
+title = "Star"
+[[trigger.param]]
+name = "message"
+type = "string"
+[[trigger.param]]
+name = "starred"
+type = "bool"
+default = true
+
+[[action]]
+id = "mark"
+capability = "mail.mark"
+args = { message = { cel = "event.data.message" }, flagged = { cel = "event.data.starred" } }
