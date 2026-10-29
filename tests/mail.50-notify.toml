@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "mail from a person is announced with the sender and the subject"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "Anna <anna@example.com>", to = "me@example.org", subject = "Lunch?", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }
+[[test.call]]
+capability = "notify.show"
+args = { title = "Anna <anna@example.com>", body = "Lunch?" }
+
+[[test]]
+name = "the account is named unless it is the only one"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", account = "work", size = 1200, from = "Anna <anna@example.com>", to = "me@example.org", subject = "Lunch?", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }
+[[test.call]]
+capability = "notify.show"
+args = { title = "Anna <anna@example.com> (work)", body = "Lunch?" }
+
+[[test]]
+name = "the account without a name is not named"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", account = "default", size = 1200, from = "Anna <anna@example.com>", to = "me@example.org", subject = "Lunch?", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }
+[[test.call]]
+capability = "notify.show"
+args = { title = "Anna <anna@example.com>", body = "Lunch?" }
+
+[[test]]
+name = "a mail without a sender is not announced"
+[test.event]
+type = "mail.received"
+data = { message = "m1", folder = "INBOX", size = 1200, from = "", to = "me@example.org", subject = "Lunch?", message_id = "<1@example.com>", cc = "", date = "2026-01-01T10:00:00Z", list_id = "", precedence = "", x_spam_flag = "" }

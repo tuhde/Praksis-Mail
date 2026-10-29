@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.move-to"
+description = "Moves a mail to a folder of its account. This is what dropping a mail on a folder does."
+effect = "local-write"
+needs = ["mail.move"]
+
+[trigger]
+kind = "command"
+title = "Move a mail to a folder"
+[[trigger.param]]
+name = "message"
+type = "string"
+[[trigger.param]]
+name = "folder"
+type = "string"
+
+[[action]]
+id = "move"
+capability = "mail.move"
+args = { message = { cel = "event.data.message" }, folder = { cel = "event.data.folder" } }

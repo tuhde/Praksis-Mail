@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.50-notify"
+description = "Shows a notification on the desktop for mail from people: not for spam, lists or bulk mail, which the rules before this one move and stop. At most a few a minute are shown (a setting of the notify module); the rest are counted."
+effect = "local-write"
+needs = ["notify.show"]
+requires_modules = ["notify"]
+
+[trigger]
+kind = "event"
+type = "mail.received"
+filter = "event.data.from != ''"
+
+[[action]]
+id = "show"
+capability = "notify.show"
+args = { title = { cel = "event.data.from + ((has(event.data.account) && event.data.account != 'default') ? ' (' + event.data.account + ')' : '')" }, body = { cel = "event.data.subject" } }

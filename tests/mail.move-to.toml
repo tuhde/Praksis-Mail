@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "moves the mail to the folder"
+[test.event]
+type = "command.mail.move-to"
+data = { message = "m1", folder = "Archive" }
+[[test.call]]
+capability = "mail.move"
+args = { message = "m1", folder = "Archive" }

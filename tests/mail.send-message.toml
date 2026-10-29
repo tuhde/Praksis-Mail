@@ -11,10 +11,10 @@ type = "command.mail.send-message"
 data = { to = "anna@example.org", subject = "Hello", text = "Hi Anna" }
 [[test.call]]
 capability = "mail.send"
-args = { to = "anna@example.org", cc = "", bcc = "", subject = "Hello", text = "Hi Anna", in_reply_to = "", references = "", attachments = [] }
+args = { account = "", to = "anna@example.org", cc = "", bcc = "", subject = "Hello", text = "Hi Anna", in_reply_to = "", references = "", attachments = [] }
 [[test.call]]
 capability = "mail.append"
-args = { folder = "Sent", content = "bWFpbCBib2R5", seen = true }
+args = { account = "", folder = "Sent", content = "bWFpbCBib2R5", seen = true }
 [[test.call]]
 capability = "contacts.add"
 args = { addresses = "anna@example.org, , " }
@@ -29,10 +29,10 @@ type = "command.mail.send-message"
 data = { to = "anna@example.org", subject = "Hello", text = "Hi Anna" }
 [[test.call]]
 capability = "mail.send"
-args = { to = "anna@example.org", cc = "", bcc = "", subject = "Hello", text = "Hi Anna", in_reply_to = "", references = "", attachments = [] }
+args = { account = "", to = "anna@example.org", cc = "", bcc = "", subject = "Hello", text = "Hi Anna", in_reply_to = "", references = "", attachments = [] }
 [[test.call]]
 capability = "mail.append"
-args = { folder = "Sent", content = "bWFpbCBib2R5", seen = true }
+args = { account = "", folder = "Sent", content = "bWFpbCBib2R5", seen = true }
 
 [[test]]
 name = "the sent folder is a parameter and everyone is remembered"
@@ -46,10 +46,10 @@ type = "command.mail.send-message"
 data = { to = "anna@example.org", cc = "bob@example.org", bcc = "carl@example.org", subject = "Hello", text = "Hi", in_reply_to = "<1@x>", references = "<1@x>" }
 [[test.call]]
 capability = "mail.send"
-args = { to = "anna@example.org", cc = "bob@example.org", bcc = "carl@example.org", subject = "Hello", text = "Hi", in_reply_to = "<1@x>", references = "<1@x>", attachments = [] }
+args = { account = "", to = "anna@example.org", cc = "bob@example.org", bcc = "carl@example.org", subject = "Hello", text = "Hi", in_reply_to = "<1@x>", references = "<1@x>", attachments = [] }
 [[test.call]]
 capability = "mail.append"
-args = { folder = "Gesendet", content = "bWFpbCBib2R5", seen = true }
+args = { account = "", folder = "Gesendet", content = "bWFpbCBib2R5", seen = true }
 [[test.call]]
 capability = "contacts.add"
 args = { addresses = "anna@example.org, bob@example.org, carl@example.org" }
@@ -64,7 +64,7 @@ type = "command.mail.send-message"
 data = { to = "anna@example.org", subject = "Files", text = "see attached", attachments = [{ name = "notes.txt", upload = "7c2d1d2e-0000-4000-8000-000000000001" }] }
 [[test.call]]
 capability = "mail.send"
-args = { to = "anna@example.org", cc = "", bcc = "", subject = "Files", text = "see attached", in_reply_to = "", references = "", attachments = [{ name = "notes.txt", upload = "7c2d1d2e-0000-4000-8000-000000000001" }] }
+args = { account = "", to = "anna@example.org", cc = "", bcc = "", subject = "Files", text = "see attached", in_reply_to = "", references = "", attachments = [{ name = "notes.txt", upload = "7c2d1d2e-0000-4000-8000-000000000001" }] }
 [[test.call]]
 capability = "mail.append"
-args = { folder = "Sent", content = "bWFpbCBib2R5", seen = true }
+args = { account = "", folder = "Sent", content = "bWFpbCBib2R5", seen = true }

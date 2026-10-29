@@ -1,12 +1,23 @@
 # SPDX-License-Identifier: Apache-2.0
-# A mail reader: the folders, the mails of the selected folder, and the selected mail.
-# Needs a mail module with the capabilities mail.folders, mail.list, mail.search, mail.get and
-# mail.attachment (to save an attachment), and grants for them in the layer that owns this view. The buttons and opening a mail start the
-# commands mail.read, mail.unread, mail.star and mail.trash, which need grants for mail.mark and
+# A mail reader: the accounts (if there are several), the folders, the mails of the selected folder,
+# and the selected mail.
+#
+# Needs a mail module with the capabilities mail.accounts, mail.folders, mail.list, mail.search,
+# mail.get and mail.attachment (to save an attachment), and grants for them in the layer that owns
+# this view. The buttons and opening a mail start the commands mail.read, mail.unread, mail.star,
+# mail.trash and mail.move-to (dragging a mail onto a folder), which need grants for mail.mark and
 # mail.move as well. With the smtp module there are buttons for writing a mail, answering and
 # forwarding (the view mail.compose); without it they are not shown.
+#
+# Keys (when you are not typing): r reply, a reply all, f forward, e edit a draft, c new mail,
+# u mark unread, s star, S unstar, Delete trash, t conversations or single mails, m more, / search.
 title = "Mail"
-description = "Folders, the mails of a folder and the selected mail."
+description = "Accounts, folders, the mails of a folder and the selected mail."
+
+# the account that is shown; empty means the first one
+[param.account]
+type = "string"
+default = ""
 
 [param.folder]
 type = "string"
@@ -31,17 +42,26 @@ default = ""
 type = "bool"
 default = false
 
+# whether the mails of a conversation are shown together
+[param.threaded]
+type = "bool"
+default = false
+
+[source.accounts]
+capability = "mail.accounts"
+
 [source.folders]
 capability = "mail.folders"
+args = { account = { cel = "view.account != '' ? view.account : source.accounts.items[0].name" } }
 
 [source.messages]
 capability = "mail.list"
-args = { folder = { cel = "view.folder" }, limit = { cel = "view.limit" } }
+args = { account = { cel = "view.account != '' ? view.account : source.accounts.items[0].name" }, folder = { cel = "view.folder" }, limit = { cel = "view.limit" }, threaded = { cel = "view.threaded" } }
 when = { cel = "view.query == ''" }
 
 [source.found]
 capability = "mail.search"
-args = { folder = { cel = "view.folder" }, query = { cel = "view.query" }, limit = { cel = "view.limit" } }
+args = { account = { cel = "view.account != '' ? view.account : source.accounts.items[0].name" }, folder = { cel = "view.folder" }, query = { cel = "view.query" }, limit = { cel = "view.limit" } }
 when = { cel = "view.query != ''" }
 
 # the selected mail is read only when there is one
@@ -53,31 +73,63 @@ when = { cel = "view.message != ''" }
 [[component]]
 type = "row"
 
-# the folders; choosing one forgets the selected mail
+# the accounts (only if there are several) and the folders; choosing one forgets the selected mail
 [[component.children]]
-type = "list"
+type = "column"
 width = 200
+
+[[component.children.children]]
+type = "list"
+items = { cel = "source.accounts.items" }
+title = { cel = "item.name" }
+subtitle = { cel = "item.state == 'ok' ? '' : item.state" }
+emphasis = { cel = "item.name == (view.account != '' ? view.account : source.accounts.items[0].name)" }
+select = { param = "account", value = { cel = "item.name" }, clear = ["folder", "message", "limit", "query", "images"] }
+visible = { cel = "size(source.accounts.items) > 1" }
+
+[[component.children.children]]
+type = "list"
 items = { cel = "source.folders.folders" }
 title = { cel = "item.name + (item.unread > 0 ? ' (' + string(item.unread) + ')' : '')" }
 emphasis = { cel = "item.unread > 0" }
 select = { param = "folder", value = { cel = "item.name" }, clear = ["message", "limit", "query", "images"] }
+drop = { command = "mail.move-to", param = "message", args = { folder = { cel = "item.name" } } }
 empty = "No folders"
 
 # the mails of the folder (or the search), unread ones in bold; opening one marks it read
 [[component.children]]
 type = "column"
-width = 520
+width = 460
 
 [[component.children.children]]
+type = "row"
+
+[[component.children.children.children]]
 type = "button"
 label = "New mail"
-opens = { view = "mail.compose", params = { mode = "new" } }
+opens = { view = "mail.compose", params = { mode = "new", account = { cel = "view.account != '' ? view.account : source.accounts.items[0].name" } } }
+key = "c"
 requires_modules = ["smtp"]
+
+[[component.children.children.children]]
+type = "button"
+label = "Conversations"
+sets = { param = "threaded", value = true }
+key = "t"
+visible = { cel = "!view.threaded" }
+
+[[component.children.children.children]]
+type = "button"
+label = "Single mails"
+sets = { param = "threaded", value = false }
+key = "t"
+visible = { cel = "view.threaded" }
 
 [[component.children.children]]
 type = "input"
 param = "query"
 placeholder = "Search the folder (sender, subject, text)"
+key = "/"
 
 [[component.children.children]]
 type = "table"
@@ -87,15 +139,17 @@ emphasis = { cel = "item.unread" }
 columns = [
   { title = "", value = { cel = "item.starred ? '*' : ''" } },
   { title = "From", value = { cel = "item.from" } },
-  { title = "Subject", value = { cel = "item.subject" } },
+  { title = "Subject", value = { cel = "(view.threaded && view.query == '' && item.depth > 0 ? '   > ' : '') + item.subject" } },
   { title = "Date", value = { cel = "item.time" }, format = "datetime" },
 ]
 select = { param = "message", value = { cel = "item.id" }, clear = ["images"], then = { command = "mail.read", args = { message = { cel = "item.id" } } } }
+drag = { cel = "item.id" }
 
 [[component.children.children]]
 type = "button"
 label = "More"
 sets = { param = "limit", value = { cel = "view.limit + 200" } }
+key = "m"
 visible = { cel = "size(view.query == '' ? source.messages.items : source.found.items) >= view.limit && view.limit < 1000" }
 
 # the selected mail
@@ -110,6 +164,7 @@ visible = { cel = "view.message != ''" }
 type = "button"
 label = "Reply"
 opens = { view = "mail.compose", params = { mode = "reply", reply_to = { cel = "view.message" } } }
+key = "r"
 requires_modules = ["smtp"]
 visible = { cel = "view.folder != params.drafts_folder" }
 
@@ -117,6 +172,7 @@ visible = { cel = "view.folder != params.drafts_folder" }
 type = "button"
 label = "Reply all"
 opens = { view = "mail.compose", params = { mode = "reply-all", reply_to = { cel = "view.message" } } }
+key = "a"
 requires_modules = ["smtp"]
 visible = { cel = "view.folder != params.drafts_folder" }
 
@@ -124,12 +180,14 @@ visible = { cel = "view.folder != params.drafts_folder" }
 type = "button"
 label = "Forward"
 opens = { view = "mail.compose", params = { mode = "forward", reply_to = { cel = "view.message" } } }
+key = "f"
 requires_modules = ["smtp"]
 
 [[component.children.children.children]]
 type = "button"
 label = "Edit draft"
 opens = { view = "mail.compose", params = { mode = "draft", reply_to = { cel = "view.message" } } }
+key = "e"
 requires_modules = ["smtp"]
 visible = { cel = "view.folder == params.drafts_folder" }
 
@@ -138,18 +196,21 @@ type = "button"
 label = "Mark unread"
 command = "mail.unread"
 args = { message = { cel = "view.message" } }
+key = "u"
 
 [[component.children.children.children]]
 type = "button"
 label = "Star"
 command = "mail.star"
 args = { message = { cel = "view.message" } }
+key = "s"
 
 [[component.children.children.children]]
 type = "button"
 label = "Unstar"
 command = "mail.star"
 args = { message = { cel = "view.message" }, starred = false }
+key = "S"
 
 [[component.children.children.children]]
 type = "button"
@@ -157,6 +218,7 @@ label = "Trash"
 command = "mail.trash"
 args = { message = { cel = "view.message" } }
 sets = { param = "message", value = "" }
+key = "Delete"
 
 [[component.children.children]]
 type = "text"

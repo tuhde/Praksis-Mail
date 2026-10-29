@@ -23,6 +23,7 @@ not triggered by events.
 | `mail.read` / `mail.unread` | marks a mail read or unread | `mail.mark` |
 | `mail.star` | stars a mail (`starred=false` takes the star away) | `mail.mark` |
 | `mail.trash` | moves a mail to `params.trash_folder` | `mail.move` |
+| `mail.move-to` | moves a mail to a folder of its account (what dropping a mail on a folder does) | `mail.move` |
 | `mail.purge` | deletes a mail for good, **it cannot be undone** | `mail.delete` |
 | `mail.send-message` | sends a mail (`to`, `cc`, `bcc`, `subject`, `text`, attachments), keeps a copy in `params.sent_folder` and remembers the people it went to | `mail.send`, `mail.append`, `contacts.add` (optional) |
 | `mail.save-draft` | saves a mail that is not finished in `params.drafts_folder`; nothing is sent | `mail.compose`, `mail.append` |
@@ -95,6 +96,53 @@ capability = "mail.folders"
 
 (and the same for `mail.list`, `mail.search`, `mail.get` and `mail.attachment`). Open it in Praksis Desktop on the tab Views.
 
+## Several accounts
+
+Give every account a table of its own in `praksis.toml`, in the module that you use (and the same
+names for `smtp`, so that an answer goes out from the account of the mail):
+
+```toml
+[module.imap.work]
+host = "imap.example.org"
+user = "me@example.org"
+credential = "imap:work"
+
+[module.imap.private]
+host = "imap.example.net"
+user = "me"
+credential = "imap:private"
+```
+
+A mail names its account (in its id), so a rule that moves it, or a command, needs no more. A list
+or a search says which account it means with `account`; the reader has a list of accounts above the
+folders when there are several. Grants can limit `account` like any other argument. The view
+**Accounts** shows how each account is doing (with a button that logs in to every one now), what can
+send and how many mails it sent in the last hour, and writes out the configuration for a new
+account for you to copy: it changes nothing itself, because your configuration and your grants are
+yours to change.
+
+## Daily use
+
+- **Keys** (when you are not typing): `r` reply, `a` reply all, `f` forward, `e` edit a draft, `c`
+  new mail, `u` mark unread, `s` star, `S` unstar, `Delete` trash, `t` conversations or single mails,
+  `m` more, `/` search, `Ctrl+Enter` send (in the writing view). The keys are written in the views;
+  change them there.
+- **Drag and drop:** drag a mail onto a folder to move it (the command `mail.move-to`, which needs
+  a grant for `mail.move`).
+- **Conversations:** the button `Conversations` puts the mails of a conversation together (by
+  `References` and `In-Reply-To`), the oldest first, the answers indented. It works on the page that
+  is shown, so a conversation whose start is further back starts at the oldest mail on the page.
+- **Notifications:** with the `notify` module, mail from people (not spam, lists or bulk mail) shows
+  a notification with the sender and the subject, naming the account if there are several, even if
+  no window is open. At most five a minute are shown (`max_per_minute`); the others are counted and
+  the next one says how many were left out.
+
+```toml
+[module.notify]
+command = ["notify-send", "--app-name=Praksis"]
+max_per_minute = 5
+```
+
 ## Writing mail
 
 With the `smtp` module the reader has the buttons **New mail**, **Reply**, **Reply all** and **Forward**
@@ -125,7 +173,8 @@ What a ruleset offers that needs a module you did not enable is **left out, not 
 nobody is remembered, and everything else works. (A rule, a view, a part of a view or a step of a rule
 can say `requires_modules = ["smtp"]`.) The daemon says what it left out in its log.
 
-For writing, add to your grants (the layer is the one you gave this ruleset):
+For several accounts, for the notifications and for the list of accounts, add grants for
+`mail.accounts`, `mail.senders` and `notify.show` in the same way. For writing, add to your grants (the layer is the one you gave this ruleset):
 
 ```toml
 # reading what an answer starts from, and the completion

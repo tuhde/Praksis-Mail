@@ -1,0 +1,132 @@
+# SPDX-License-Identifier: Apache-2.0
+# The mail accounts: how each one is doing, what can send, and how to add one. Adding an account
+# changes your configuration and your grants, which only you do: this view shows what to write and
+# changes nothing.
+# Needs grants for mail.accounts (and mail.senders, if you have the smtp module).
+title = "Accounts"
+description = "The mail accounts and how they are doing, and how to add one."
+
+# whether to log in to every account now, to see if it works
+[param.check]
+type = "bool"
+default = false
+
+# the values for the configuration that is shown at the bottom
+[param.name]
+type = "string"
+default = "work"
+
+[param.host]
+type = "string"
+default = "imap.example.org"
+
+[param.smtp_host]
+type = "string"
+default = "smtp.example.org"
+
+[param.user]
+type = "string"
+default = "me@example.org"
+
+[param.password_command]
+type = "string"
+default = "[\"pass\", \"show\", \"mail/work\"]"
+
+[source.accounts]
+capability = "mail.accounts"
+args = { check = { cel = "view.check" } }
+
+[source.senders]
+capability = "mail.senders"
+requires_modules = ["smtp"]
+
+[[component]]
+type = "text"
+value = "Mail accounts"
+style = "title"
+
+[[component]]
+type = "table"
+rows = { cel = "source.accounts.items" }
+empty = "No account is set up."
+emphasis = { cel = "item.state != 'ok'" }
+columns = [
+  { title = "Account", value = { cel = "item.name" } },
+  { title = "Kind", value = { cel = "item.kind" } },
+  { title = "Login and server", value = { cel = "item.address" } },
+  { title = "State", value = { cel = "item.state" } },
+  { title = "Last problem", value = { cel = "item.error" } },
+]
+
+[[component]]
+type = "button"
+label = "Check the connections"
+sets = { param = "check", value = true }
+key = "k"
+
+[[component]]
+type = "text"
+value = "Sending"
+style = "title"
+requires_modules = ["smtp"]
+
+[[component]]
+type = "table"
+rows = { cel = "source.senders.items" }
+empty = "No account can send."
+requires_modules = ["smtp"]
+columns = [
+  { title = "Account", value = { cel = "item.name" } },
+  { title = "Sends as", value = { cel = "item.from" } },
+  { title = "Server", value = { cel = "item.server" } },
+  { title = "Sent in the last hour", value = { cel = "item.sent_last_hour >= 0 ? string(item.sent_last_hour) + ' of ' + string(item.max_per_hour) : 'unknown'" } },
+]
+
+[[component]]
+type = "text"
+value = "Add an account"
+style = "title"
+
+[[component]]
+type = "text"
+value = "Fill in the fields (press Enter in each) and copy the configuration below into praksis.toml and policy.toml. Praksis does not write them: they decide where your mail and your passwords go."
+style = "muted"
+
+[[component]]
+type = "row"
+
+[[component.children]]
+type = "input"
+param = "name"
+placeholder = "Name of the account"
+
+[[component.children]]
+type = "input"
+param = "user"
+placeholder = "Login (usually the address)"
+
+[[component]]
+type = "row"
+
+[[component.children]]
+type = "input"
+param = "host"
+placeholder = "IMAP server"
+
+[[component.children]]
+type = "input"
+param = "smtp_host"
+placeholder = "SMTP server"
+
+[[component]]
+type = "row"
+
+[[component.children]]
+type = "input"
+param = "password_command"
+placeholder = "Command that prints the password, as a list"
+
+[[component]]
+type = "text"
+value = { cel = "'# in praksis.toml: one table for each account (an existing [module.imap] section becomes\\n# [module.imap.<name>], the same for [module.smtp]); the names must be the same for both\\n' + '[module.imap.' + view.name + ']\\nhost = \"' + view.host + '\"\\nuser = \"' + view.user + '\"\\ncredential = \"imap:' + view.name + '\"\\n\\n' + '[module.smtp.' + view.name + ']\\nhost = \"' + view.smtp_host + '\"\\nuser = \"' + view.user + '\"\\ncredential = \"smtp:' + view.name + '\"\\nfrom = \"' + view.user + '\"\\n\\n' + '# in policy.toml: the command that prints the password, and who may ask for it\\n' + '[credential.\"imap:' + view.name + '\"]\\ncommand = ' + view.password_command + '\\ncapabilities = [\"imap.inbox\", \"mail.accounts\", \"mail.folders\", \"mail.list\", \"mail.search\", \"mail.get\", \"mail.attachment\", \"mail.mark\", \"mail.delete\", \"mail.move\", \"mail.append\"]\\n\\n' + '[credential.\"smtp:' + view.name + '\"]\\ncommand = ' + view.password_command + '\\ncapabilities = [\"mail.send\"]\\n\\n' + '# then: praksis modules lock, restart the daemon, and look at this view again\\n'" }
+style = "code"

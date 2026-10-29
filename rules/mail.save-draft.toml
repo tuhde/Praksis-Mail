@@ -44,6 +44,11 @@ label = "Attachments"
 default = []
 widget = "files"
 [[trigger.param]]
+name = "account"
+type = "string"
+default = ""
+widget = "hidden"
+[[trigger.param]]
 name = "in_reply_to"
 type = "string"
 default = ""
@@ -57,9 +62,9 @@ widget = "hidden"
 [[action]]
 id = "compose"
 capability = "mail.compose"
-args = { to = { cel = "event.data.to" }, cc = { cel = "event.data.cc" }, bcc = { cel = "event.data.bcc" }, subject = { cel = "event.data.subject" }, text = { cel = "event.data.text" }, in_reply_to = { cel = "event.data.in_reply_to" }, references = { cel = "event.data.references" }, attachments = { cel = "event.data.attachments" } }
+args = { account = { cel = "event.data.account" }, to = { cel = "event.data.to" }, cc = { cel = "event.data.cc" }, bcc = { cel = "event.data.bcc" }, subject = { cel = "event.data.subject" }, text = { cel = "event.data.text" }, in_reply_to = { cel = "event.data.in_reply_to" }, references = { cel = "event.data.references" }, attachments = { cel = "event.data.attachments" } }
 
 [[action]]
 id = "save"
 capability = "mail.append"
-args = { folder = { cel = "params.drafts_folder" }, content = { cel = "results.compose.raw" }, seen = false, draft = true }
+args = { account = { cel = "event.data.account" }, folder = { cel = "params.drafts_folder" }, content = { cel = "results.compose.raw" }, seen = false, draft = true }
