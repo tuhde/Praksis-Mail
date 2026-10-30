@@ -30,6 +30,19 @@ not triggered by events.
 
 `mail.send-message` and `mail.save-draft` are only there if the `smtp` module is.
 
+## Which modules
+
+The `maildir` module ships with the runtime image of Praksis. `imap`, `smtp`, `contacts` and `notify`
+are in [Praksis-Modules-Mail](https://github.com/tuhde/Praksis-Modules-Mail): build it, then install
+what you use and restart the daemon:
+
+```sh
+praksis modules install ../Praksis-Modules-Mail/praksis-module-imap/target/imap.praksis-module
+praksis modules install ../Praksis-Modules-Mail/praksis-module-smtp/target/smtp.praksis-module
+```
+
+(`praksis modules list` shows what is there.) What needs a module that is not installed is left out.
+
 ## Sending mail
 
 Sending leaves the machine and cannot be taken back, so `mail.send` has the effect class `external`:
