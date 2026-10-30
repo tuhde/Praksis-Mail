@@ -31,3 +31,44 @@ default = "Drafts"
 [param.signature]
 type = "string"
 default = ""
+
+# Sorting by what a mail says, with a language model (needs the ai module). Off until you switch it
+# on: a model can be wrong, and a mail that is moved by mistake is hard to find. Try it first with
+# the command "Evaluate the model" (mail.ai-evaluate) and your own examples.
+[param.ai_sort]
+type = "bool"
+default = false
+
+# which profile of the ai module reads the mail ("local" keeps the text on this machine)
+[param.ai_profile]
+type = "string"
+default = "local"
+
+# the labels a mail can get, and the ones that are moved (to ai_folder_prefix + label)
+[param.ai_labels]
+type = "list"
+default = ["invoice", "receipt", "newsletter", "personal", "other"]
+
+[param.ai_move_labels]
+type = "list"
+default = ["invoice", "receipt", "newsletter"]
+
+[param.ai_folder_prefix]
+type = "string"
+default = "Auto/"
+
+# what the model should know about your mail, in a sentence or two
+[param.ai_instructions]
+type = "string"
+default = "A receipt confirms a payment that was made; an invoice asks for one. A newsletter is sent to many people. Mail from a person who writes to the reader is personal."
+
+# examples with the right label, for the evaluation: texts of mails that you know the answer for
+[param.ai_examples]
+type = "list"
+default = [
+  { text = "Dear customer, your invoice no. 4711 over 129.00 EUR is due on 15 November. Please transfer the amount.", label = "invoice" },
+  { text = "Thank you for your payment of 49.90 EUR. This is your receipt for order 8812.", label = "receipt" },
+  { text = "Our autumn offer: 20% off everything. Unsubscribe here. You receive this because you signed up.", label = "newsletter" },
+  { text = "Hi Till, are you coming to my birthday party on Saturday? Love, Anna", label = "personal" },
+  { text = "Can you send me the minutes of yesterday's meeting? Thanks, Bob", label = "personal" },
+]

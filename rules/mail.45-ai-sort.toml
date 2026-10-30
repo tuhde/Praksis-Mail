@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.45-ai-sort"
+description = "Sorts mail by what it says: a language model (the ai module) picks one of the labels in params.ai_labels, and mail with one of the labels in params.ai_move_labels goes to a folder of that name below params.ai_folder_prefix. Mail that gets no label from the list, or a label that is not moved, stays where it is. Off unless params.ai_sort is true; see the README before switching it on."
+effect = "external"
+needs = ["mail.get", "ai.classify", "mail.move"]
+requires_modules = ["ai"]
+
+[trigger]
+kind = "event"
+type = "mail.received"
+filter = "params.ai_sort && event.data.from != ''"
+
+[[action]]
+id = "read"
+capability = "mail.get"
+args = { message = { cel = "event.data.message" } }
+
+# the text of the mail is data, not an instruction (the module says so to the model); only the labels
+# of the list can come out
+[[action]]
+id = "classify"
+capability = "ai.classify"
+args = { text = { cel = "'From: ' + event.data.from + '\\nSubject: ' + event.data.subject + '\\n\\n' + (results.read.text.size() > 3000 ? results.read.text.substring(0, 3000) : results.read.text)" }, labels = { cel = "params.ai_labels" }, instructions = { cel = "params.ai_instructions" }, fallback = "", profile = { cel = "params.ai_profile" } }
+
+[[action]]
+id = "move"
+capability = "mail.move"
+when = { cel = "results.classify.matched && results.classify.label in params.ai_move_labels" }
+args = { message = { cel = "event.data.message" }, folder = { cel = "params.ai_folder_prefix + results.classify.label" } }
+
+[[action]]
+stop = true
+when = { cel = "results.classify.matched && results.classify.label in params.ai_move_labels" }

@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+id = "mail.ai-evaluate"
+description = "Tests how well the model of a profile sorts mail, before the rule mail.45-ai-sort is switched on: it labels the examples in params.ai_examples (put in mails of your own that you know the answer for) and a notification says how many it got right and which ones it got wrong. It asks the model once for every example, which costs time and counts against the daily budget of the profile."
+effect = "external"
+needs = ["ai.evaluate", "notify.show"]
+requires_modules = ["ai"]
+
+[trigger]
+kind = "command"
+title = "Evaluate the model for sorting mail"
+description = "Labels the examples with the model and says how many it got right."
+[[trigger.param]]
+name = "profile"
+type = "string"
+label = "The profile of the ai module"
+default = ""
+
+[[action]]
+id = "evaluate"
+capability = "ai.evaluate"
+args = { examples = { cel = "params.ai_examples" }, labels = { cel = "params.ai_labels" }, instructions = { cel = "params.ai_instructions" }, profile = { cel = "event.data.profile != '' ? event.data.profile : params.ai_profile" } }
+
+[[action]]
+id = "tell"
+capability = "notify.show"
+requires_modules = ["notify"]
+args = { title = { cel = "'Model ' + results.evaluate.model + ' (' + results.evaluate.data + '): ' + string(results.evaluate.correct) + ' of ' + string(results.evaluate.total) + ' right' + (results.evaluate.complete ? '' : ' (stopped by the budget)')" }, body = { cel = "results.evaluate.misses.size() == 0 ? 'No mistakes.' : 'Wrong: ' + results.evaluate.misses.map(m, m.expected + ' as ' + m.got).join('; ')" } }

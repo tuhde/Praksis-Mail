@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+format_version = 1
+
+[[test]]
+name = "the examples are labelled and the result is announced"
+[test.params]
+ai_examples = [{ text = "Please pay", label = "invoice" }, { text = "Hi Till, party?", label = "personal" }]
+ai_instructions = "Be careful."
+[test.mock."ai.evaluate"]
+accuracy = 0.5
+correct = 1
+total = 2
+off_list = 0
+complete = true
+model = "m1"
+data = "local"
+misses = [{ expected = "personal", got = "newsletter", text = "Hi Till, party?" }]
+[test.event]
+type = "command.mail.ai-evaluate"
+data = { profile = "" }
+[[test.call]]
+capability = "ai.evaluate"
+args = { examples = [{ text = "Please pay", label = "invoice" }, { text = "Hi Till, party?", label = "personal" }], labels = ["invoice", "receipt", "newsletter", "personal", "other"], instructions = "Be careful.", profile = "local" }
+[[test.call]]
+capability = "notify.show"
+args = { title = "Model m1 (local): 1 of 2 right", body = "Wrong: personal as newsletter" }
+
+[[test]]
+name = "a profile can be chosen when the command is started"
+[test.params]
+ai_examples = [{ text = "Please pay", label = "invoice" }]
+ai_instructions = "Be careful."
+[test.mock."ai.evaluate"]
+accuracy = 1.0
+correct = 1
+total = 1
+off_list = 0
+complete = false
+model = "big"
+data = "cloud"
+misses = []
+[test.event]
+type = "command.mail.ai-evaluate"
+data = { profile = "cloud" }
+[[test.call]]
+capability = "ai.evaluate"
+args = { examples = [{ text = "Please pay", label = "invoice" }], labels = ["invoice", "receipt", "newsletter", "personal", "other"], instructions = "Be careful.", profile = "cloud" }
+[[test.call]]
+capability = "notify.show"
+args = { title = "Model big (cloud): 1 of 1 right (stopped by the budget)", body = "No mistakes." }

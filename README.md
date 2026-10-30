@@ -43,6 +43,35 @@ praksis modules install ../Praksis-Modules-Mail/praksis-module-smtp/target/smtp.
 
 (`praksis modules list` shows what is there.) What needs a module that is not installed is left out.
 
+## Sorting by what a mail says (the ai module)
+
+With the `ai` module from [Praksis-Modules-AI](https://github.com/tuhde/Praksis-Modules-AI) the rule
+`mail.45-ai-sort` asks a language model which of your labels (`ai_labels`) fits a mail, and moves mail
+with one of the labels in `ai_move_labels` to `ai_folder_prefix` + label (`Auto/invoice`). It runs
+after the rules for spam, lists and bulk mail and is **off until you switch it on**:
+
+```toml
+[param]
+ai_sort = true
+ai_profile = "local"      # a profile of the ai module: the text of a mail stays on this machine
+```
+
+A model can be wrong, and a mail that is moved by mistake is hard to find, so:
+
+1. **Try the model first.** The command **Evaluate the model for sorting mail** (`mail.ai-evaluate`)
+   labels the examples in `ai_examples` (put in mails of your own that you know the answer for, with
+   the label that is right) and a notification says how many it got right and which ones it got wrong.
+   A small model on a CPU is slow (seconds per mail) and gets some wrong; a bigger one does better.
+2. **Only labels of your list can move a mail,** whatever the text of the mail says: the answer is
+   checked against the list, anything else leaves the mail where it is, and a grant should list the
+   folders the rule may move to (`folder = { one_of = ["Auto/invoice", ...] }`) and the profile it may
+   ask (`profile = { one_of = ["local"] }`).
+3. Mail that is not moved is handled by the rules after it (the notification) as before.
+
+The text of the mail goes to the model as data, apart from the instruction (see the README of the
+module). A mail that says "ignore your instructions" does not get far, but **no rule should do
+something important because of text that a model has read.**
+
 ## Sending mail
 
 Sending leaves the machine and cannot be taken back, so `mail.send` has the effect class `external`:
