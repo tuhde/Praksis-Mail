@@ -130,6 +130,8 @@ type = "input"
 param = "query"
 placeholder = "Search the folder (sender, subject, text)"
 key = "/"
+# push to talk: the button listens for one sentence (the speech module) and searches for it
+dictate = { capability = "speech.listen", args = { seconds = 8 }, requires_modules = ["speech"] }
 
 [[component.children.children]]
 type = "table"

@@ -72,6 +72,16 @@ The text of the mail goes to the model as data, apart from the instruction (see 
 module). A mail that says "ignore your instructions" does not get far, but **no rule should do
 something important because of text that a model has read.**
 
+## Speaking a search
+
+With the `speech` module of [Praksis-Modules-AI](https://github.com/tuhde/Praksis-Modules-AI) the search
+box of the reader gets a **Speak** button: press it, say what to look for ("invoices from anna"), and
+the box is filled and the search is done. It listens for one sentence (at most 8 seconds) with your
+local Vosk. It needs a grant for `speech.listen` in the layer that owns the view (the button does not name a
+profile, so a grant that limits the profile would not cover it: the speech module uses its default
+profile, and everything stays on this machine); every use is in the audit log. Without the module
+the button is not there.
+
 ## Sending mail
 
 Sending leaves the machine and cannot be taken back, so `mail.send` has the effect class `external`:
